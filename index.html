@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EdgeCDN Dashboard - Autumn Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Осенняя палитра */
+            --bg-main: #14100d;
+            --bg-card: #221a15;
+            --bg-card-hover: #2d231d;
+            --text-main: #f5ebe1;
+            --text-muted: #9e8c7d;
+            --border-color: #3b2d24;
+            
+            --accent-amber: #ff9e00;
+            --accent-gold: #e6b800;
+            --accent-orange: #ff6b00;
+            --accent-maple: #d9381e;
+            --accent-olive: #7a8b4a;
+            
+            --font-ui: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            background-image: radial-gradient(circle at top right, rgba(255, 107, 0, 0.05), transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(217, 56, 30, 0.03), transparent 40%);
+            color: var(--text-main);
+            font-family: var(--font-ui);
+            line-height: 1.5;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* --- Header --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: none;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none;
+            font-size: 30px;
+        }
+
+        /* Белый SVG-лист дерева */
+        .logo svg {
+            width: 24px;
+            height: 24px;
+            fill: #ffffff; 
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+        }
+
+        .title h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-main);
+        }
+
+        .title p {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge {
+            background: rgba(230, 184, 0, 0.1);
+            color: var(--accent-gold);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(122, 139, 74, 0.1);
+            color: var(--accent-olive); background: rgba(122, 139, 74, 0.1);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-olive);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent-olive);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* --- Common Card Style --- */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-title::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: var(--accent-orange);
+            border-radius: 2px;
+        }
+
+        .card-badge {
+            font-size: 11px;
+            color: var(--accent-amber);
+            background: rgba(255, 158, 0, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        /* --- Metrics Grid --- */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .metric-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: baseline;
+            color: var(--text-main);
+        }
+
+        .metric-value span {
+            font-size: 16px;
+            color: var(--accent-gold);
+            font-weight: 500;
+            margin-left: 2px;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--accent-amber);
+            font-weight: 500;
+        }
+
+        .metric-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        /* --- Nodes Grid --- */
+        .nodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+        }
+
+        .node-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 158, 0, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+
+        .node-card:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(255, 158, 0, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .node-code {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+            color: var(--text-main);
+        }
+
+        .node-city {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .node-latency {
+            font-size: 11px;
+            font-family: var(--font-mono);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .latency-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .latency-green { background: var(--accent-olive); box-shadow: 0 0 6px var(--accent-olive); }
+        .latency-yellow { background: var(--accent-gold); box-shadow: 0 0 6px var(--accent-gold); }
+        .latency-red { background: var(--accent-maple); box-shadow: 0 0 6px var(--accent-maple); }
+
+        .latency-text-green { color: var(--accent-olive); }
+        .latency-text-yellow { color: var(--accent-gold); }
+        .latency-text-red { color: var(--accent-maple); }
+
+        /* --- Log Terminal --- */
+        .log-terminal {
+            background: #0f0b09;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            height: 280px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            border: 1px solid #2d231d;
+        }
+
+        .log-terminal::-webkit-scrollbar {
+            width: 6px;
+        }
+        .log-terminal::-webkit-scrollbar-thumb {
+            background: #3b2d24;
+            border-radius: 3px;
+        }
+
+        .log-line {
+            display: flex;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .log-time { color: var(--accent-gold); }
+        .log-method-get { color: var(--accent-olive); }
+        .log-method-miss { color: var(--accent-orange); }
+        .log-method-purge { color: var(--accent-maple); }
+        .log-path { color: #d4c5b9; }
+        .log-details { color: #8c7b6d; margin-left: auto; }
+        .log-node { color: var(--accent-amber); }
+
+        /* --- Footer --- */
+        .footer {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            margin-top: 10px;
+            padding-bottom: 20px;
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+            .metric-value {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 12px; }
+            .header { flex-direction: column; align-items: flex-start; }
+            .status-badge { align-self: flex-start; }
+            .nodes-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .log-line {
+                flex-wrap: wrap;
+                white-space: normal;
+            }
+            .log-details {
+                margin-left: 0;
+                width: 100%;
+                padding-left: 52px; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <!-- Header -->
+    <header class="header">
+        <div class="brand">
+            <!-- Иконка листа дерева (SVG) -->
+            <div class="logo">
+                🍂
+            </div>
+            <div class="title">
+                <h1>OctoberCDN</h1>
+                <p>Точка присутствия • Москва / RU NODE 3.1</p>
+            </div>
+        </div>
+        <div class="status-badge">
+            <div class="status-dot"></div>
+            <span>ОПЕРАТИВНО 99.98% Uptime</span>
+        </div>
+    </header>
+
+    <!-- Metrics Section -->
+    <section class="card">
+        <div class="card-header">
+            <div class="card-title">Метрики узла (Live)</div>
+            <div class="card-badge">• обновлено 3с назад</div>
+        </div>
+        <div class="metrics-grid">
+            <div class="metric-item">
+                <div class="metric-value" id="val-requests">1.4<span>млн</span></div>
+                <div class="metric-label">Запросы</div>
+                <div class="metric-sub">PSR • реальное время</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-value" id="val-bandwidth">9.8<span>Gbps</span></div>
+                <div class="metric-label">Пропускная</div>
+                <div class="metric-sub">способность • сейчас</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-value" id="val-cache">97.6<span>%</span></div>
+                <div class="metric-label">Кэш-хит</div>
+                <div class="metric-sub">попадание в кэш</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-value" id="val-throughput">4.2<span>млн</span></div>
+                <div class="metric-label">Пропуск/с</div>
+                <div class="metric-sub">RPS • в сек</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Nodes Section -->
+    <section class="card">
+        <div class="card-header">
+            <div class="card-title">Периферийные узлы</div>
+            <div class="card-badge" style="color: var(--accent-olive); background: rgba(122, 139, 74, 0.1);">6 Pop онлайн</div>
+        </div>
+        <div class="nodes-grid">
+            <!-- RU -->
+            <div class="node-card">
+                <div class="node-code">RU</div>
+                <div class="node-city">Москва</div>
+                <div class="node-latency"><span class="latency-dot latency-green"></span><span class="latency-text-green" id="lat-ru">0.3ms</span></div>
+            </div>
+            <!-- DE -->
+            <div class="node-card">
+                <div class="node-code">DE</div>
+                <div class="node-city">Франкфурт</div>
+                <div class="node-latency"><span class="latency-dot latency-green"></span><span class="latency-text-green" id="lat-de">18ms</span></div>
+            </div>
+            <!-- NL -->
+            <div class="node-card">
+                <div class="node-code">NL</div>
+                <div class="node-city">Амстердам</div>
+                <div class="node-latency"><span class="latency-dot latency-yellow"></span><span class="latency-text-yellow" id="lat-nl">27ms</span></div>
+            </div>
+            <!-- SG -->
+            <div class="node-card">
+                <div class="node-code">SG</div>
+                <div class="node-city">Сингапур</div>
+                <div class="node-latency"><span class="latency-dot latency-green"></span><span class="latency-text-green" id="lat-sg">112ms</span></div>
+            </div>
+            <!-- US -->
+            <div class="node-card">
+                <div class="node-code">US</div>
+                <div class="node-city">Остин</div>
+                <div class="node-latency"><span class="latency-dot latency-green"></span><span class="latency-text-green" id="lat-us">98ms</span></div>
+            </div>
+            <!-- BR -->
+            <div class="node-card">
+                <div class="node-code">BR</div>
+                <div class="node-city">Сан-Паулу</div>
+                <div class="node-latency"><span class="latency-dot latency-yellow"></span><span class="latency-text-yellow" id="lat-br">180ms</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Logs Section -->
+    <section class="card">
+        <div class="card-header">
+            <div class="card-title">Журнал событий</div>
+            <div class="card-badge">tail -f /var/log/edgecdn/access.log</div>
+        </div>
+        <div class="log-terminal" id="log-terminal">
+            <!-- Logs will be generated here -->
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        • OctoberCDN Node RU-MSK-031 • ver 4.2.1-c core • TLS 1.3 • HTTP/3 ready • © 2026
+    </footer>
+</div>
+
+<script>
+    // --- Mock Data Simulation ---
+
+    // 1. Metrics Fluctuation
+    const requestsEl = document.getElementById('val-requests');
+    const bandwidthEl = document.getElementById('val-bandwidth');
+    const cacheEl = document.getElementById('val-cache');
+    const throughputEl = document.getElementById('val-throughput');
+
+    function updateMetrics() {
+        const req = (1.4 + (Math.random() * 0.4 - 0.2)).toFixed(1);
+        requestsEl.innerHTML = `${req}<span>млн</span>`;
+
+        const bw = (9.5 + (Math.random() * 1.0 - 0.5)).toFixed(1);
+        bandwidthEl.innerHTML = `${bw}<span>Gbps</span>`;
+
+        const cache = (97.5 + (Math.random() * 1.5 - 0.75)).toFixed(1);
+        cacheEl.innerHTML = `${cache}<span>%</span>`;
+
+        const tp = (4.2 + (Math.random() * 0.6 - 0.3)).toFixed(1);
+        throughputEl.innerHTML = `${tp}<span>млн</span>`;
+    }
+
+    // 2. Latency Fluctuation
+    const nodes = ['ru', 'de', 'nl', 'sg', 'us', 'br'];
+    function updateLatency() {
+        nodes.forEach(node => {
+            const el = document.getElementById(`lat-${node}`);
+            let base = parseFloat(el.innerText);
+            let newValue = base + (Math.random() * 2 - 1);
+            if (newValue < 0) newValue = 0.1;
+            
+            el.innerText = `${newValue.toFixed(1)}ms`;
+
+            const dot = el.previousElementSibling;
+            if (newValue < 50) {
+                dot.className = 'latency-dot latency-green';
+                el.className = 'latency-text-green';
+            } else if (newValue < 150) {
+                dot.className = 'latency-dot latency-yellow';
+                el.className = 'latency-text-yellow';
+            } else {
+                dot.className = 'latency-dot latency-red';
+                el.className = 'latency-text-red';
+            }
+        });
+    }
+
+    // 3. Log Streaming
+    const terminal = document.getElementById('log-terminal');
+    const paths = ['/assets/bundle.js', '/img/hero.webp', '/api/v2/config', '/fonts/inter-woff2', '/logo.svg', '/favicon.ico', '/api/v1/user', '/static/css/style'];
+    const methods = ['GET', 'MISS', 'PURGE', 'HIT'];
+    const nodesList = ['RU-MSK-01', 'DE-FRA-02', 'NL-AMS-01', 'SG-SIN-01'];
+
+    function getFormattedTime() {
+        const now = new Date();
+        return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
+    }
+
+    function addLog() {
+        const time = getFormattedTime();
+        const method = methods[Math.floor(Math.random() * methods.length)];
+        const path = paths[Math.floor(Math.random() * paths.length)];
+        const node = nodesList[Math.floor(Math.random() * nodesList.length)];
+        const latency = (Math.random() * 5).toFixed(1) + 'ms';
+        const size = (Math.random() * 500 + 10).toFixed(1) + 'kB';
+
+        let methodClass = 'log-method-get';
+        if (method === 'MISS') methodClass = 'log-method-miss';
+        if (method === 'PURGE') methodClass = 'log-method-purge';
+
+        let details = `- ${latency}`;
+        if (method === 'GET') details = `${size} - ${latency}`;
+        if (method === 'MISS') details = `- fetched origin - ${latency}`;
+        if (method === 'PURGE') details = `- invalidated - 0.5ms`;
+
+        const logHTML = `
+            <div class="log-line">
+                <span class="log-time">${time}</span>
+                <span class="${methodClass}">${method}</span>
+                <span class="log-path">${path}</span>
+                <span class="log-details">${details} <span class="log-node">- ${node}</span></span>
+            </div>
+        `;
+
+        terminal.insertAdjacentHTML('beforeend', logHTML);
+        terminal.scrollTop = terminal.scrollHeight;
+
+        if (terminal.children.length > 50) {
+            terminal.removeChild(terminal.firstElementChild);
+        }
+    }
+
+    // Initial logs
+    addLog();
+    addLog();
+    addLog();
+
+    // Set intervals
+    setInterval(updateMetrics, 2000);
+    setInterval(updateLatency, 3000);
+    setInterval(addLog, 1500);
+
+</script>
+</body>
+</html>
